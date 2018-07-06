@@ -11,6 +11,7 @@ from http.server import SimpleHTTPRequestHandler
 
 import pkg_resources
 
+
 class WebGUIRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, request, client_address, server):
         super().__init__(request, client_address, server)
