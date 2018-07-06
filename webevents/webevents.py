@@ -1,10 +1,12 @@
-import cgi
-import io
-import json
-import multiprocessing
 import os
-import socketserver
+import io
+import cgi
+import json
+import pathlib
 import threading
+import contextlib
+import socketserver
+import multiprocessing
 from http.server import SimpleHTTPRequestHandler
 
 import pkg_resources
@@ -122,6 +124,16 @@ class SnakesEvents:
         self._py_in_queue.put(None)
 
 
+@contextlib.contextmanager
+def _working_directory(path):
+    prev_cwd = pathlib.Path.cwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(prev_cwd)
+
+
 def _run_server(address, in_queue, out_queue):
     socketserver.ThreadingTCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer(
@@ -134,14 +146,14 @@ def _run_server(address, in_queue, out_queue):
 
 
 def run(address, folder, timeout=2):
-    os.chdir(folder)
-    py_in_queue = multiprocessing.Queue()
-    py_out_queue = multiprocessing.Queue()
-    guiproc = multiprocessing.Process(
-        target=_run_server,
-        args=(address, py_out_queue, py_in_queue)
-    )
-    guiproc.start()
+    with _working_directory(folder):
+        py_in_queue = multiprocessing.Queue()
+        py_out_queue = multiprocessing.Queue()
+        guiproc = multiprocessing.Process(
+            target=_run_server,
+            args=(address, py_out_queue, py_in_queue)
+        )
+        guiproc.start()
     snakes_events = SnakesEvents(py_in_queue, py_out_queue, timeout)
     snakes_events.add_termination_callback(lambda: guiproc.terminate())
     snakes_events.add_termination_callback(lambda: guiproc.join())
