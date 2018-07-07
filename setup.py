@@ -8,7 +8,7 @@ def read_readme():
 
 setup(
     name="webevents",
-    version="0.1.1",
+    version="0.1.2",
     packages=["webevents"],
     package_data={
         "webevents": ["webevents.js"],
