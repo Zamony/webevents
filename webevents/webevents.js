@@ -25,12 +25,6 @@ var webevents = (function () {
   function _publishEvent(type, e) {
     if (!subscribers[type]) return;
 
-    /*
-    if (!e.type) {
-      e.type = type;
-    }
-    */
-
     var listeners = subscribers[type];
 
     for (var i = 0, length = listeners.length; i < length; i++) {
@@ -53,7 +47,9 @@ var webevents = (function () {
     fetch("/snakes_receive.json")
       .then((resp) => resp.json())
       .then(function (event) {
-        _publishEvent(event.event_type, event.data);
+        if (event != ""){
+          _publishEvent(event.event_type, event.data);
+        }
       })
       .catch(function (error) {
         console.log(error);

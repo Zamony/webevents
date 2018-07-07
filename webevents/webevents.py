@@ -21,9 +21,15 @@ class WebGUIRequestHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
-            message_dict = self.server.in_queue.get()
-            message_str = json.dumps(message_dict)
-            self.wfile.write(message_str.encode("utf-8"))
+            try:
+                message_dict = self.server.in_queue.get_nowait()
+            except Exception:
+                self.wfile.write('""'.encode("utf-8"))
+                self.server.out_queue.put("keep_alive")
+            else:    
+                message_str = json.dumps(message_dict)
+                self.wfile.write(message_str.encode("utf-8"))
+            
         elif self.path == "/webevents.js":
             self.send_response(200)
             self.send_header(
@@ -62,7 +68,7 @@ class WebGUIRequestHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
             self.end_headers()
-            out.write("{}")
+            out.write('""')
             out.detach()
 
     def log_message(self, format, *args):
@@ -105,6 +111,8 @@ class SnakesEvents:
                 break
             if data is None:
                 break
+            if data == "keep_alive":
+                continue
             try:
                 event_type = data["event_type"]
                 event_data = data.get("data")
