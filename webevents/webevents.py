@@ -154,7 +154,7 @@ def _run_server(address, in_queue, out_queue):
         httpd.serve_forever()
 
 
-def run(address, folder, timeout=2):
+def run(address, folder, timeout=5):
     with _working_directory(folder):
         py_in_queue = multiprocessing.Queue()
         py_out_queue = multiprocessing.Queue()
