@@ -54,7 +54,7 @@ var webevents = (function () {
       .catch(function (error) {
         console.log(error);
       });
-    setTimeout(_pullEvent, 1000);
+    setTimeout(_pullEvent, 100);
   }
 
   function getFormSerialization(form_element){
@@ -76,4 +76,4 @@ var webevents = (function () {
   };
 })();
 
-setTimeout(webevents._pullEvent, 1000);
+webevents._pullEvent();
